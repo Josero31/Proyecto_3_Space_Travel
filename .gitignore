@@ -1,0 +1,28 @@
+# Rust
+/target
+Cargo.lock
+**/*.rs.bk
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Binaries
+*.exe
+*.dll
+*.dylib
+*.so
+
+# Videos
+*.mp4
+*.mov
+*.avi
+*.mkv
