@@ -1,125 +1,78 @@
-mod math;
-mod renderer;
-mod scene;
-mod camera;
-mod physics;
+﻿use macroquad::prelude::*;
 
-use math::Vec3;
-use renderer::SoftwareRenderer;
-use scene::CelestialBody;
-use camera::Camera;
-use std::fs;
+struct Planet {
+    x: f32,
+    y: f32,
+    radius: f32,
+    color: Color,
+    orbit_radius: f32,
+    angle: f32,
+    speed: f32,
+}
 
-fn main() {
-    // Create output directory
-    let _ = fs::create_dir_all("output");
-
-    let mut renderer = SoftwareRenderer::new();
-    let mut solar_system = create_solar_system();
-    let mut camera = Camera::new(Vec3::new(0.0, 100.0, 600.0), Vec3::new(0.0, 0.0, 0.0));
-    camera.look_at(Vec3::new(0.0, 0.0, 0.0));
-
-    println!("Space Travel - Solar System Simulator");
-    println!("Rendering {} frames...", 300);
-    
-    const TOTAL_FRAMES: usize = 300;
-    const DT: f64 = 0.033; // ~30 FPS
-
-    for frame in 0..TOTAL_FRAMES {
-        // Render
-        renderer.clear(0x0a0e27ff);
-
-        // Draw celestial bodies
-        for body in &solar_system {
-            draw_celestial_body(&mut renderer, body, &camera);
-        }
-
-        // Save frame
-        if frame % 10 == 0 {
-            let img = renderer.framebuffer.to_image();
-            let filename = format!("output/frame_{:04}.png", frame);
-            img.save(&filename).expect("Failed to save frame");
-            println!("Frame {} saved", frame);
-        }
-
-        // Update solar system
-        for body in &mut solar_system {
-            body.update(DT, Vec3::new(0.0, 0.0, 0.0));
-        }
-
-        // Animate camera
-        if frame < 100 {
-            // Move around the sun
-            let angle = (frame as f64 / 100.0) * std::f64::consts::PI * 2.0;
-            let radius = 600.0;
-            camera.position = Vec3::new(
-                angle.cos() * radius,
-                100.0,
-                angle.sin() * radius,
-            );
-            camera.look_at(Vec3::new(0.0, 0.0, 0.0));
-        } else if frame < 200 {
-            // Zoom to Earth
-            let progress = (frame - 100) as f64 / 100.0;
-            let from = Vec3::new(600.0, 100.0, 0.0);
-            let to = Vec3::new(400.0, 50.0, 100.0);
-            camera.position = Vec3::new(
-                from.x + (to.x - from.x) * progress,
-                from.y + (to.y - from.y) * progress,
-                from.z + (to.z - from.z) * progress,
-            );
-            camera.look_at(Vec3::new(400.0, 0.0, 0.0));
-        } else {
-            // Circle Earth
-            let progress = (frame - 200) as f64 / 100.0;
-            let angle = progress * std::f64::consts::PI * 2.0;
-            camera.position = Vec3::new(
-                400.0 + angle.cos() * 200.0,
-                50.0 + 150.0 * (angle / std::f64::consts::PI * 2.0).sin().abs(),
-                100.0 + angle.sin() * 200.0,
-            );
-            camera.look_at(Vec3::new(400.0, 0.0, 0.0));
+impl Planet {
+    fn new(orbit_radius: f32, speed: f32, radius: f32, color: Color) -> Self {
+        Planet {
+            x: orbit_radius,
+            y: 0.0,
+            radius,
+            color,
+            orbit_radius,
+            angle: 0.0,
+            speed,
         }
     }
 
-    println!("Rendering complete! Check the 'output' directory.");
+    fn update(&mut self, dt: f32) {
+        self.angle += self.speed * dt;
+        self.x = self.orbit_radius * self.angle.cos();
+        self.y = self.orbit_radius * self.angle.sin();
+    }
 }
 
-fn create_solar_system() -> Vec<CelestialBody> {
-    vec![
-        CelestialBody::new_star("Sun", Vec3::new(0.0, 0.0, 0.0), 50.0, 0xFFD700FF),
-        CelestialBody::new_planet("Mercury", 150.0, 2.0, 15.0, 0x8C7853FF),
-        CelestialBody::new_planet("Venus", 250.0, 1.5, 30.0, 0xFFC649FF),
-        CelestialBody::new_planet("Earth", 400.0, 1.0, 35.0, 0x4169E1FF),
-        CelestialBody::new_planet("Mars", 550.0, 0.8, 25.0, 0xE27B58FF),
-        CelestialBody::new_planet("Jupiter", 900.0, 0.5, 80.0, 0xC88B3AFF),
-        CelestialBody::new_planet("Saturn", 1200.0, 0.35, 70.0, 0xE5C55BFF),
-    ]
-}
+#[macroquad::main("Sistema Solar")]
+async fn main() {
+    let mut planets = vec![
+        Planet::new(80.0, 0.5, 5.0, Color::new(0.8, 0.4, 0.2, 1.0)),
+        Planet::new(120.0, 0.3, 8.0, Color::new(1.0, 0.9, 0.2, 1.0)),
+        Planet::new(160.0, 0.2, 9.0, Color::new(0.1, 0.5, 1.0, 1.0)),
+        Planet::new(200.0, 0.15, 6.0, Color::new(1.0, 0.3, 0.1, 1.0)),
+        Planet::new(260.0, 0.08, 20.0, Color::new(1.0, 0.6, 0.2, 1.0)),
+        Planet::new(320.0, 0.05, 15.0, Color::new(1.0, 0.8, 0.3, 1.0)),
+    ];
 
-fn draw_celestial_body(renderer: &mut SoftwareRenderer, body: &CelestialBody, camera: &Camera) {
-    let relative_pos = body.position - camera.position;
-    let distance = relative_pos.magnitude();
+    let sun_color = Color::new(1.0, 0.8, 0.0, 1.0);
 
-    if distance > 0.1 {
-        let forward = camera.get_forward();
-        let projected_distance = relative_pos.dot(&forward);
+    loop {
+        let dt = get_frame_time();
 
-        if projected_distance > 0.1 {
-            let right = camera.get_right();
-            let screen_x = relative_pos.dot(&right);
-            let screen_y = relative_pos.dot(&camera.up);
+        // Clear screen
+        clear_background(BLACK);
 
-            let screen_pos = math::Vec2::new(
-                640.0 + screen_x * 100.0 / projected_distance,
-                360.0 - screen_y * 100.0 / projected_distance,
-            );
+        let center_x = screen_width() / 2.0;
+        let center_y = screen_height() / 2.0;
 
-            let screen_radius = body.radius * 100.0 / projected_distance;
+        // Draw sun
+        draw_circle(center_x, center_y, 12.0, sun_color);
 
-            if screen_radius > 0.5 {
-                renderer.draw_filled_circle(screen_pos, screen_radius, body.color);
-            }
+        // Update and draw planets
+        for planet in &mut planets {
+            planet.update(dt);
+
+            let px = center_x + planet.x;
+            let py = center_y + planet.y;
+
+            draw_circle(px, py, planet.radius, planet.color);
         }
+
+        // Draw FPS
+        draw_text(&format!("FPS: {:.0}", get_fps()), 10.0, 20.0, 20.0, WHITE);
+
+        // Exit with ESC
+        if is_key_pressed(KeyCode::Escape) {
+            break;
+        }
+
+        next_frame().await;
     }
 }
