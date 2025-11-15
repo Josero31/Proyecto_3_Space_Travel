@@ -64,6 +64,10 @@ Solo un archivo `src/main.rs` (~180 líneas) con:
 4. Las órbitas se muestran como círculos tenues de referencia
 5. El Sol se dibuja en el centro con efecto de brillo
 
-## Autor
+## Video 
+
+https://github.com/user-attachments/assets/58ca8a5b-9dcf-4250-ab5f-45d880b47737
+
+
 
 Proyecto educativo de simulación orbital en Rust
