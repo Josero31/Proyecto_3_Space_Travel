@@ -1,17 +1,21 @@
-# Solar System Simulator - Rust Edition
+# Sistema Solar - Simulador en Rust
 
-Un simulador **interactivo en tiempo real** del sistema solar creado desde cero en Rust con un motor de renderizado por software personalizado.
+Un simulador **interactivo en tiempo real** del sistema solar creado en Rust con **macroquad**, un framework de gráficos simple y potente.
 
-## Características Principales
+## Características
 
-- ✅ **7 Cuerpos Celestes**: El Sol + Mercurio, Venus, Tierra, Marte, Júpiter y Saturno
-- ✅ **Movimiento Orbital en Tiempo Real**: Cada planeta orbita al Sol con velocidades astronómicamente proporcionadas
-- ✅ **Rotación Axial**: Los cuerpos celestes rotan sobre sus ejes
-- ✅ **Cámara 3D Interactiva**: Navega libremente con teclado
-- ✅ **Saltos Instantáneos**: Warp a cualquier planeta (teclas 1-6)
-- ✅ **Renderizado por Software**: Motor personalizado sin dependencias de GPU
-- ✅ **Rendimiento Optimizado**: 30+ FPS en resolución 1280x720
-- ✅ **Sin Dependencias Externas Complejas**: Solo minifb para ventana
+- ✅ **6 Planetas + El Sol**: Mercurio, Venus, Tierra, Marte, Júpiter y Saturno
+- ✅ **Movimiento Orbital en Tiempo Real**: Cada planeta orbita al Sol con velocidades proporcionales
+- ✅ **Órbitas Visibles**: Líneas que muestran las trayectorias de cada planeta
+- ✅ **Detalles Visuales**: 
+  - Anillos en Saturno
+  - Continentes verdes en la Tierra
+  - Cráteres en Marte
+  - Bandas de nubes en Júpiter
+- ✅ **Nombre de Cada Planeta**: Etiquetas identifican cada cuerpo celeste
+- ✅ **Fondo Espacial Oscuro**: Visualización inmersiva
+- ✅ **Sin Dependencias Externas**: Solo macroquad (todo incluido)
+- ✅ **Renderizado Suave**: 60+ FPS
 
 ## Requisitos
 
@@ -21,75 +25,45 @@ Un simulador **interactivo en tiempo real** del sistema solar creado desde cero 
 ## Compilación y Ejecución
 
 ```bash
-# Compilar
-cargo build --release
-
-# Ejecutar
+# Compilar y ejecutar
 cargo run --release
 ```
 
-¡Eso es todo! Se abrirá una ventana interactiva con el sistema solar en movimiento.
+¡Eso es todo! Se abrirá una ventana con el sistema solar en movimiento.
 
 ## Controles
 
-### Movimiento de Cámara
 | Tecla | Acción |
 |-------|--------|
-| **W** | Avanzar |
-| **S** | Retroceder |
-| **A** | Izquierda |
-| **D** | Derecha |
-| **Q** | Bajar |
-| **E** | Subir |
-
-### Saltos a Planetas
-| Tecla | Destino |
-|-------|---------|
-| **1** | Sol |
-| **2** | Mercurio |
-| **3** | Venus |
-| **4** | Tierra |
-| **5** | Marte |
-| **6** | Júpiter |
-
-### Salida
-- **ESC** - Cerrar aplicación
+| **ESC** | Cerrar aplicación |
 
 ## Estructura del Código
 
-El proyecto está en un solo archivo `src/main.rs` con ~500 líneas de código que incluye:
+Solo un archivo `src/main.rs` (~180 líneas) con:
 
-- **Vec3**: Vector 3D con operaciones (magnitud, normalización, dot, cross)
-- **Camera**: Sistema de cámara en primera persona
-- **CelestialBody**: Representación de planetas con órbitas y rotación
-- **Proyección 3D → 2D**: Conversión perspectiva personalizada
-- **Rasterización**: Círculos dibujados con algoritmo Midpoint
-
-## Arquitectura Técnica
-
-### Sistema de Coordenadas
-- Plano eclíptico en Y=0
-- Órbitas circulares alrededor del Sol en el origen
-- Distancias y tamaños escalados para visualización óptima
-
-### Física Orbital Simplificada
-- Velocidades orbitales inversamente proporcionales a √r
-- Movimiento tangencial suave alrededor del Sol
-- Delta-time independiente para consistencia
-
-### Renderizado
-- Proyección perspectiva personalizada
-- Rasterización de círculos (Midpoint Circle Algorithm)
-- Buffer RGB 32-bit
-- Culling por profundidad
+- **Planet struct**: Representa cada planeta con posición, órbita y propiedades visuales
+- **Mecánica Orbital**: Actualización angular para movimiento suave
+- **Renderizado**: Círculos, anillos y detalles usando macroquad
+- **Loop Principal**: Bucle asíncrono con actualización y renderizado cada frame
 
 ## Dependencias
 
-Solo una dependencia:
-- `minifb 0.25` - Ventana y framebuffer
+- `macroquad 0.4` - Framework gráfico todo en uno (ventana, renderizado, input)
 
 ## Rendimiento
 
-- **Resolución**: 1280x720
-- **FPS**: 30+ FPS típico
-- **Compilación**: ~2 segundos en release
+- **Resolución**: Ventana escalable (por defecto 800x600)
+- **FPS**: 60+ FPS constante
+- **Compilación**: ~20 segundos en release (primera vez)
+
+## Cómo Funciona
+
+1. El programa crea 6 planetas con diferentes órbitas y velocidades
+2. Cada frame actualiza el ángulo orbital de cada planeta
+3. Los planetas se dibujan como círculos con sus características visuales
+4. Las órbitas se muestran como círculos tenues de referencia
+5. El Sol se dibuja en el centro con efecto de brillo
+
+## Autor
+
+Proyecto educativo de simulación orbital en Rust
